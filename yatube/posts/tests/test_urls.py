@@ -34,7 +34,6 @@ class StaticURLTests(TestCase):
             f"/group/{self.group.slug}/",
             f"/{self.post.author}/",
             f"/{self.post.author}/{self.post.id}/",
-            f"/{self.post.author}/{self.post.id}/comment/",
         )
         for address in templates_url_names:
             with self.subTest(address=address):
@@ -42,11 +41,13 @@ class StaticURLTests(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_new_post_url_redirect_anonymous_on_admin_login(self):
-        """Страницы по адресу /new/, /Name/1/, /Name/1/edit/
+        """Страницы по адресу /new/, /Name/1/, /Name/1/edit/, /Name/1/comment/
         перенаправят анонимного пользователя на страницу логина."""
         templates_url_names = {
             "/new/":
             "/auth/login/?next=/new/",
+            f"/{self.post.author}/{self.post.id}/comment/":
+            f"/auth/login/?next=/{self.post.author}/{self.post.id}/comment/",
             f"/{self.post.author}/{self.post.id}/edit/":
             f"/auth/login/?next=/{self.post.author}/{self.post.id}/edit/",
         }

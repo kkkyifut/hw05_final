@@ -214,6 +214,29 @@ class PostPagesTests(TestCase):
             new_object_1, new_object_2
         )
 
+    def test_follow_on_user(self):
+        """Подписка на автора работает корректно"""
+        Follow.objects.get_or_create(
+            author=self.user, user=self.user_1
+        )
+        following = Follow.objects.filter(
+            author=self.user, user=self.user_1
+        ).exists()
+        self.assertEqual(following, True)
+        for create_3_follower_on_1_user in range(3):
+            Follow.objects.get_or_create(
+                author=self.user, user=self.user_1
+            )
+        self.assertEqual(len(Follow.objects.all()), 1)
+
+    def test_unfollow_on_user(self):
+        """Отписка от автора работает корректно"""
+        Follow.objects.get_or_create(
+            author=self.user, user=self.user_1
+        )
+        Follow.objects.filter(author=self.user, user=self.user_1).delete()
+        self.assertEqual(len(Follow.objects.all()), 0)
+
 
 class PaginatorViewsTest(TestCase):
     """Тестирование пагинатора."""

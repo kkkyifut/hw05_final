@@ -215,27 +215,37 @@ class PostPagesTests(TestCase):
         )
 
     def test_follow_on_user(self):
-        """Подписка на автора работает корректно"""
-        Follow.objects.get_or_create(
-            author=self.user, user=self.user_1
-        )
+        """Подписка на автора работает корректно."""
+        self.authorized_client.get(reverse(
+            "posts:profile_follow",
+            kwargs={"username": self.user_1.username}
+        ))
         following = Follow.objects.filter(
-            author=self.user, user=self.user_1
+            author=self.user_1, user=self.user
         ).exists()
-        self.assertEqual(following, True)
-        for create_3_follower_on_1_user in range(3):
-            Follow.objects.get_or_create(
-                author=self.user, user=self.user_1
-            )
-        self.assertEqual(len(Follow.objects.all()), 1)
+        self.assertTrue(following)
+        for _ in range(3):
+            self.authorized_client.get(reverse(
+                "posts:profile_follow",
+                kwargs={"username": self.user_1.username}
+            ))
+        follow_count = Follow.objects.all().count()
+        self.assertEqual(follow_count, 1)
 
     def test_unfollow_on_user(self):
-        """Отписка от автора работает корректно"""
-        Follow.objects.get_or_create(
-            author=self.user, user=self.user_1
-        )
-        Follow.objects.filter(author=self.user, user=self.user_1).delete()
-        self.assertEqual(len(Follow.objects.all()), 0)
+        """Отписка от автора работает корректно."""
+        self.authorized_client.get(reverse(
+            "posts:profile_follow",
+            kwargs={"username": self.user_1.username}
+        ))
+        self.authorized_client.get(reverse(
+            "posts:profile_unfollow",
+            kwargs={"username": self.user_1.username}
+        ))
+        following = Follow.objects.filter(
+            author=self.user_1, user=self.user
+        ).exists()
+        self.assertFalse(following)
 
 
 class PaginatorViewsTest(TestCase):
@@ -249,7 +259,7 @@ class PaginatorViewsTest(TestCase):
             title="Название группы 1", slug="new_author_1",
             description="Описание 1"
         )
-        for create_13_posts in range(13):
+        for _ in range(13):
             cls.post = Post.objects.create(
                 text="ж" * 100,
                 author=cls.user,

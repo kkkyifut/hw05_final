@@ -89,6 +89,7 @@ class StaticURLTests(TestCase):
             "/",
             f"/group/{self.group.slug}/",
             "/new/",
+            "/follow/",
             f"/{self.post.author}/",
             f"/{self.post.author}/{self.post.id}/",
             f"/{self.post.author}/{self.post.id}/comment/",
@@ -115,7 +116,10 @@ class StaticURLTests(TestCase):
 
     def test_page_404(self):
         """Страница по адресу /admin/ne111/ возвращает страницу 404."""
-        response = self.guest_client.get("/admin/ne111/")
-        self.assertEqual(
-            response.status_code, HTTPStatus.NOT_FOUND
+        templates_url_names = (
+            "/admin/ne111/",
         )
+        for address in templates_url_names:
+            with self.subTest(address=address):
+                response = self.authorized_client_1.get(address)
+                self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

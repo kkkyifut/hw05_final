@@ -234,10 +234,10 @@ class PostPagesTests(TestCase):
 
     def test_unfollow_on_user(self):
         """Отписка от автора работает корректно."""
-        self.authorized_client.get(reverse(
-            "posts:profile_follow",
-            kwargs={"username": self.user_1.username}
-        ))
+        following = Follow.objects.get_or_create(
+            author=self.user_1, user=self.user
+        )
+        self.assertTrue(following)
         self.authorized_client.get(reverse(
             "posts:profile_unfollow",
             kwargs={"username": self.user_1.username}
